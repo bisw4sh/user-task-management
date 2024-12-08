@@ -3,7 +3,9 @@ import "dotenv/config";
 import passport from "passport";
 import signupRoute from "./routes/signup";
 import signinRoute from "./routes/signin";
+import authRoute from "./routes/auth";
 import "./utils/passport";
+import { errorHandler } from "./middleware/error_handler";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -14,6 +16,11 @@ app.use(express.urlencoded({ extended: true }));
 app.use(passport.initialize());
 
 //Routes
+app.use(
+  "/api/auth",
+  passport.authenticate("jwt", { session: false }),
+  authRoute
+);
 app.use("/api/signup", signupRoute);
 app.use("/api/signin", signinRoute);
 
@@ -25,14 +32,15 @@ app.get(
       const user = req.user as { email: string };
       res.status(200).json({
         success: true,
-        user: user.email, 
+        user: user.email,
       });
     } catch (error) {
-      next(error); 
+      next(error);
     }
   }
 );
 
+app.use(errorHandler);
 app.listen(PORT, () => {
   console.log("Server is running on http://localhost:" + PORT);
 });

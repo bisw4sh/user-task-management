@@ -15,16 +15,17 @@ import Navbar from "./Pages/Navbar";
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<Navbar />} />
-      <Route index element={<HomePage />} />
-      <Route path="signin" element={<SignInPage />} action={signInAction} />
-      <Route path="signup" element={<SignUpPage />} action={signUpAction} />
-      <Route
-        path="protected"
-        element={<Protected />}
-        loader={protectedloader}
-      />
-      <Route path="dashboard" element={<Dashboard />} />
+      <Route path="/" element={<Navbar />}>
+        <Route index element={<HomePage />} />
+        <Route path="signin" element={<SignInPage />} action={signInAction} />
+        <Route path="signup" element={<SignUpPage />} action={signUpAction} />
+        <Route
+          path="protected"
+          element={<Protected />}
+          loader={protectedloader}
+        />
+        <Route path="dashboard" element={<Dashboard />} />
+      </Route>
     </>
   )
 );
@@ -34,7 +35,7 @@ const queryClient = new QueryClient();
 const Routes = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />;
+      <RouterProvider router={router} />
     </QueryClientProvider>
   );
 };
