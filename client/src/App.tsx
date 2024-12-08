@@ -9,18 +9,22 @@ import SignInPage, { action as signInAction } from "./Pages/SignIn";
 import SignUpPage, { action as signUpAction } from "./Pages/SignUp";
 import Protected, { loader as protectedloader } from "./Pages/Protected";
 import { QueryClient, QueryClientProvider } from "react-query";
+import Dashboard from "./Pages/Dashboard";
+import Navbar from "./Pages/Navbar";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/signin" element={<SignInPage />} action={signInAction} />
-      <Route path="/signup" element={<SignUpPage />} action={signUpAction} />
+      <Route path="/" element={<Navbar />} />
+      <Route index element={<HomePage />} />
+      <Route path="signin" element={<SignInPage />} action={signInAction} />
+      <Route path="signup" element={<SignUpPage />} action={signUpAction} />
       <Route
-        path="/protected"
+        path="protected"
         element={<Protected />}
         loader={protectedloader}
       />
+      <Route path="dashboard" element={<Dashboard />} />
     </>
   )
 );
