@@ -5,7 +5,7 @@ import {
   Route,
 } from "react-router";
 import HomePage from "./Pages/HomePage";
-import SignInPage, { action as signInAction } from "./Pages/SignIn";
+import SignInPage from "./Pages/SignIn";
 import SignUpPage, { action as signUpAction } from "./Pages/SignUp";
 import Protected, { loader as protectedloader } from "./Pages/Protected";
 import { QueryClient, QueryClientProvider } from "react-query";
@@ -17,7 +17,7 @@ const router = createBrowserRouter(
     <>
       <Route path="/" element={<Navbar />}>
         <Route index element={<HomePage />} />
-        <Route path="signin" element={<SignInPage />} action={signInAction} />
+        <Route path="signin" element={<SignInPage />} />
         <Route path="signup" element={<SignUpPage />} action={signUpAction} />
         <Route
           path="protected"
