@@ -19,6 +19,7 @@ passport.use(
       });
 
       if (user) {
+        console.log("from passport", user.email);
         return done(null, user); // Pass user object to the next middleware
       } else {
         return done(null, false); // No user found, authentication fails

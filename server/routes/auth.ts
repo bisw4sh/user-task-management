@@ -2,16 +2,16 @@ import { Router, Request, Response, NextFunction } from "express";
 
 const router = Router();
 
-router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+router.get("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user = req.user as { email: string };
-    if (user) {
+    if (!user) {
+      return res.status(404).json({ success: false, email: null });
+    } else {
       res.status(200).json({
         success: true,
-        user: user.email,
+        email: user.email,
       });
-    } else {
-      return res.status(404).json({ success: false, user: null });
     }
   } catch (error) {
     next(error);

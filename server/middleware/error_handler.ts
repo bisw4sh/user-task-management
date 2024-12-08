@@ -6,7 +6,7 @@ export const errorHandler: ErrorRequestHandler = async (
   res: Response,
   next: NextFunction
 ) => {
-  res
-    .status(error.statusCode() || 555)
-    .json({ status: error.statusCode, message: error.message });
+  const statusCode = error.status || error.statusCode || 500;
+  const message = error.message || "Internal Server Error";
+  res.status(statusCode).json({ status: statusCode, message });
 };

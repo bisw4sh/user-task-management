@@ -4,8 +4,8 @@ import passport from "passport";
 import signupRoute from "./routes/signup";
 import signinRoute from "./routes/signin";
 import authRoute from "./routes/auth";
-import "./utils/passport";
 import { errorHandler } from "./middleware/error_handler";
+import "./utils/passport";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -27,12 +27,13 @@ app.use("/api/signin", signinRoute);
 app.get(
   "/api/protected",
   passport.authenticate("jwt", { session: false }),
-  async (req: Request, res: Response, next: express.NextFunction) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = req.user as { email: string };
+      console.log("from api/protected ", user)
       res.status(200).json({
         success: true,
-        user: user.email,
+        email: user.email,
       });
     } catch (error) {
       next(error);
