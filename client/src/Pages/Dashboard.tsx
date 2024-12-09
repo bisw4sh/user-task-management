@@ -1,13 +1,13 @@
 import { useInfiniteQuery } from "react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { useTasks } from "../hooks/useTasks";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   AlertDialog,
-  // AlertDialogAction,
-  // AlertDialogCancel,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { TaskForm as UpdateTaskForm } from "@/components/UpdateTaskForm";
 import { useForm, SubmitHandler } from "react-hook-form";
+import SearchBar from "@/components/SearchBar"; 
 
 interface TaskFormInputs {
   title: string;
@@ -29,9 +30,9 @@ interface Task {
   title: string;
   description: string;
   dueDate: Date;
-  status: string; // e.g., "Pending", "Completed"
-  createdAt: Date; // ISO 8601 format or a timestamp
-  updatedAt: Date; // ISO 8601 format or a timestamp
+  status: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 interface TaskPage {
@@ -66,18 +67,29 @@ const TaskList: React.FC<{ status: string }> = ({ status }) => {
     isFetchingNextPage,
     status: queryStatus,
   } = useInfiniteQuery({
-    queryKey: ["tasks", status], // Status added to queryKey to differentiate queries
-    queryFn: ({ pageParam = 0 }) => fetchTasks({ pageParam, status }), // Pass status to fetchTasks
+    queryKey: ["tasks", status],
+    queryFn: ({ pageParam = 0 }) => fetchTasks({ pageParam, status }),
     getNextPageParam: (lastPage) => lastPage.nextPage,
   });
+
   const { updateTaskStatus, deleteTask } = useTasks();
   const { ref, inView } = useInView();
+  const [searchQuery, setSearchQuery] = useState<string>("");
 
   useEffect(() => {
     if (inView && !isFetchingNextPage && hasNextPage) {
       fetchNextPage();
     }
   }, [inView, fetchNextPage, isFetchingNextPage, hasNextPage]);
+
+  // Filter tasks based on search query
+  const filteredTasks = data?.pages?.flatMap((page: TaskPage) =>
+    page.items.filter(
+      (task) =>
+        task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  );
 
   if (queryStatus === "loading") return <div>Loading...</div>;
   if (queryStatus === "error") {
@@ -88,64 +100,63 @@ const TaskList: React.FC<{ status: string }> = ({ status }) => {
   return (
     <>
       <h2 className="text-xl font-bold mb-2 capitalize">{status} Tasks</h2>
+      <SearchBar onSearch={setSearchQuery} />
       <ScrollArea className="h-[400px] w-full rounded-md border p-4">
         <div>
           <ul className="space-y-2">
-            {data?.pages?.map((page: TaskPage, pageIndex: number) =>
-              page?.items?.map((task: Task, idx: number) => (
-                <li
-                  key={task.id || idx + pageIndex}
-                  className="flex items-center justify-between bg-gray-100 p-2 rounded"
-                >
-                  <div>
-                    <h3 className="font-semibold">{task.title}</h3>
-                    <p className="text-sm">{task.description}</p>
-                    <p className="text-xs text-gray-500">
-                      Due: {new Date(task.dueDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <div className="space-x-2">
-                    {status !== "Completed" && (
-                      <button
-                        onClick={() => updateTaskStatus(task.id, "Completed")}
-                        className="bg-green-500 text-white px-2 py-1 rounded text-sm"
-                      >
-                        Complete
-                      </button>
-                    )}
-                    {status === "Completed" && (
-                      <button
-                        onClick={() => updateTaskStatus(task.id, "Pending")}
-                        className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
-                      >
-                        Undo
-                      </button>
-                    )}
-                    <AlertDialog>
-                      <AlertDialogTrigger>Edit</AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Edit Task</AlertDialogTitle>
-                          <AlertDialogDescription></AlertDialogDescription>
-                          <UpdateTaskForm task={task} />
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          {/* <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction>Continue</AlertDialogAction> */}
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-
+            {filteredTasks?.map((task: Task) => (
+              <li
+                key={task.id}
+                className="flex items-center justify-between bg-gray-100 p-2 rounded"
+              >
+                <div>
+                  <h3 className="font-semibold">{task.title}</h3>
+                  <p className="text-sm">{task.description}</p>
+                  <p className="text-xs text-gray-500">
+                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="space-x-2">
+                  {status !== "Completed" && (
                     <button
-                      onClick={() => deleteTask(task.id)}
-                      className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                      onClick={() => updateTaskStatus(task.id, "Completed")}
+                      className="bg-green-500 text-white px-2 py-1 rounded text-sm"
                     >
-                      Delete
+                      Complete
                     </button>
-                  </div>
-                </li>
-              ))
-            )}
+                  )}
+                  {status === "Completed" && (
+                    <button
+                      onClick={() => updateTaskStatus(task.id, "Pending")}
+                      className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
+                    >
+                      Undo
+                    </button>
+                  )}
+                  <AlertDialog>
+                    <AlertDialogTrigger>Edit</AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Edit Task</AlertDialogTitle>
+                        <AlertDialogDescription></AlertDialogDescription>
+                        <UpdateTaskForm task={task} />
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+
+                  <button
+                    onClick={() => deleteTask(task.id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
           </ul>
         </div>
         <div ref={ref}>{isFetchingNextPage && "Loading..."}</div>
