@@ -1,6 +1,17 @@
 import { Outlet, Link, useNavigate } from "react-router";
 import { useQuery } from "react-query";
 import { useEffect } from "react";
+import { ModeToggle } from "@/components/mode-toggle";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { CiUser } from "react-icons/ci";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -22,7 +33,7 @@ const Navbar = () => {
       return await response.json();
     },
     {
-      refetchInterval: 60000, 
+      refetchInterval: 60000,
       retry: 1,
       onError: () => {
         navigate("/signin");
@@ -37,7 +48,7 @@ const Navbar = () => {
   }, [isError, navigate]);
 
   if (isLoading) {
-    return <div>Loading...</div>; 
+    return <div>Loading...</div>;
   }
 
   return (
@@ -48,7 +59,7 @@ const Navbar = () => {
             Home
           </Link>
         </section>
-        <section className="flex justify-center items-center gap-2 font-semibold">
+        <section className="flex justify-center items-center gap-4 font-semibold">
           {/* Show Sign In and Sign Up links if the user is not authenticated */}
           {!data?.email ? (
             <>
@@ -68,9 +79,24 @@ const Navbar = () => {
               <Link to="dashboard" className="hover:underline text-slate-600">
                 Dashboard
               </Link>
-              <div className="text-blue-600 font-bold">{data.email}</div>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <Button variant="outline" size="icon">
+                    <CiUser className="h-[1.2rem] w-[1.2rem]" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <div className="text-blue-600 font-bold">{data.email}</div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           )}
+          <ModeToggle />
         </section>
       </nav>
       <Outlet />

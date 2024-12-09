@@ -11,6 +11,7 @@ import Protected, { loader as protectedloader } from "./Pages/Protected";
 import { QueryClient, QueryClientProvider } from "react-query";
 import Dashboard from "./Pages/Dashboard";
 import Navbar from "./Pages/Navbar";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
@@ -35,7 +36,9 @@ const queryClient = new QueryClient();
 const Routes = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
+      <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+        <RouterProvider router={router} />
+      </ThemeProvider>
     </QueryClientProvider>
   );
 };

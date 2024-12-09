@@ -39,7 +39,7 @@ const Protected = () => {
   }
 
   return (
-    <div>
+    <div className="h-screen flex justify-center items-center flex-col gap-3">
       <h1>Protected Page</h1>
       <div>
         {data.success
