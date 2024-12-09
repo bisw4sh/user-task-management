@@ -1,14 +1,24 @@
-import express, { NextFunction, Request, Response } from "express";
-import "dotenv/config";
+import express from "express";
 import passport from "passport";
+import authRoute from "./routes/auth";
 import signupRoute from "./routes/signup";
 import signinRoute from "./routes/signin";
-import authRoute from "./routes/auth";
+import protectedRoute from "./routes/protected";
+import tasksRoute from "./routes/tasks";
 import { errorHandler } from "./middleware/error_handler";
 import "./utils/passport";
+import "dotenv/config";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: User;
+    }
+  }
+}
 
 // Middleware
 app.use(express.json());
@@ -21,24 +31,17 @@ app.use(
   passport.authenticate("jwt", { session: false }),
   authRoute
 );
-app.use("/api/signup", signupRoute);
-app.use("/api/signin", signinRoute);
-
-app.get(
+app.use(
   "/api/protected",
   passport.authenticate("jwt", { session: false }),
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const user = req.user as { email: string };
-      console.log("from api/protected ", user)
-      res.status(200).json({
-        success: true,
-        email: user.email,
-      });
-    } catch (error) {
-      next(error);
-    }
-  }
+  protectedRoute
+);
+app.use("/api/signup", signupRoute);
+app.use("/api/signin", signinRoute);
+app.use(
+  "/api/tasks",
+  passport.authenticate("jwt", { session: false }),
+  tasksRoute
 );
 
 app.use(errorHandler);
