@@ -5,7 +5,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --watch ./ --ext .ts --exec \"pnpm tsx server.ts\" --recursive"
+    "dev": "nodemon --watch ./ --ext .ts --exec \"pnpm tsx server.ts\" --recursive",
+    "seed": "pnpm tsx seed.ts"
   },
   "keywords": [],
   "author": "",
