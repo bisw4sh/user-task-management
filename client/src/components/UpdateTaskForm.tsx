@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useMutation } from "react-query";
+import { useMutation, useQueryClient } from "react-query";
 import { Input } from "@/components/ui/input";
-import type { Task } from "../hooks/useTasks";
+import { Task } from "../hooks/useTasks";
 
 interface TaskFormInputs {
   title: string;
@@ -40,10 +40,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({ task }) => {
     formState: { errors },
   } = useForm<TaskFormInputs>();
   const [completed, setCompleted] = useState<boolean>(false);
+  const queryClient = useQueryClient();
 
   const mutation = useMutation(updateTask, {
     onSuccess: () => {
       setCompleted(true);
+      queryClient.invalidateQueries("tasks");
     },
     onError: (error) => {
       console.error(error);

@@ -14,6 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { TaskForm as UpdateTaskForm } from "@/components/UpdateTaskForm";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface TaskFormInputs {
   title: string;
@@ -25,66 +26,68 @@ const TaskList: React.FC<{ status: string }> = ({ status }) => {
   const { tasks, updateTaskStatus, deleteTask } = useTasks();
 
   return (
-    <div>
-      <h2 className="text-xl font-bold mb-2 capitalize">{status} Tasks</h2>
-      <ul className="space-y-2">
-        {tasks
-          .filter((task) => task.status === status)
-          .map((task) => (
-            <li
-              key={task.id}
-              className="flex items-center justify-between bg-gray-100 p-2 rounded"
-            >
-              <div>
-                <h3 className="font-semibold">{task.title}</h3>
-                <p className="text-sm">{task.description}</p>
-                <p className="text-xs text-gray-500">
-                  Due: {new Date(task.dueDate).toLocaleDateString()}
-                </p>
-              </div>
-              <div className="space-x-2">
-                {status !== "Completed" && (
-                  <button
-                    onClick={() => updateTaskStatus(task.id, "Completed")}
-                    className="bg-green-500 text-white px-2 py-1 rounded text-sm"
-                  >
-                    Complete
-                  </button>
-                )}
-                {status === "Completed" && (
-                  <button
-                    onClick={() => updateTaskStatus(task.id, "Pending")}
-                    className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
-                  >
-                    Undo
-                  </button>
-                )}
-                <AlertDialog>
-                  <AlertDialogTrigger>Edit</AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Edit Task</AlertDialogTitle>
-                      <AlertDialogDescription></AlertDialogDescription>
-                      <UpdateTaskForm task={task} />
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction>Continue</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+    <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+      <div>
+        <h2 className="text-xl font-bold mb-2 capitalize">{status} Tasks</h2>
+        <ul className="space-y-2">
+          {tasks
+            .filter((task) => task.status === status)
+            .map((task) => (
+              <li
+                key={task.id}
+                className="flex items-center justify-between bg-gray-100 p-2 rounded"
+              >
+                <div>
+                  <h3 className="font-semibold">{task.title}</h3>
+                  <p className="text-sm">{task.description}</p>
+                  <p className="text-xs text-gray-500">
+                    Due: {new Date(task.dueDate).toLocaleDateString()}
+                  </p>
+                </div>
+                <div className="space-x-2">
+                  {status !== "Completed" && (
+                    <button
+                      onClick={() => updateTaskStatus(task.id, "Completed")}
+                      className="bg-green-500 text-white px-2 py-1 rounded text-sm"
+                    >
+                      Complete
+                    </button>
+                  )}
+                  {status === "Completed" && (
+                    <button
+                      onClick={() => updateTaskStatus(task.id, "Pending")}
+                      className="bg-yellow-500 text-white px-2 py-1 rounded text-sm"
+                    >
+                      Undo
+                    </button>
+                  )}
+                  <AlertDialog>
+                    <AlertDialogTrigger>Edit</AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Edit Task</AlertDialogTitle>
+                        <AlertDialogDescription></AlertDialogDescription>
+                        <UpdateTaskForm task={task} />
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction>Continue</AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
 
-                <button
-                  onClick={() => deleteTask(task.id)}
-                  className="bg-red-500 text-white px-2 py-1 rounded text-sm"
-                >
-                  Delete
-                </button>
-              </div>
-            </li>
-          ))}
-      </ul>
-    </div>
+                  <button
+                    onClick={() => deleteTask(task.id)}
+                    className="bg-red-500 text-white px-2 py-1 rounded text-sm"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </li>
+            ))}
+        </ul>
+      </div>
+    </ScrollArea>
   );
 };
 
