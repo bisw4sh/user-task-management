@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "react-query";
 
-interface Task {
+export interface Task {
   id: number;
   title: string;
   description?: string;
@@ -12,63 +12,96 @@ interface Task {
 
 type NewTask = Omit<Task, "id" | "status" | "createdAt" | "updatedAt">;
 
-// This would be replaced with actual API calls in a real application
-const mockApi = {
-  getTasks: (): Promise<Task[]> =>
-    Promise.resolve(JSON.parse(localStorage.getItem("tasks") || "[]")),
-  addTask: (task: NewTask): Promise<Task> => {
-    const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-    const newTask: Task = {
-      ...task,
-      id: tasks.length + 1,
-      status: "Pending",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-    tasks.push(newTask);
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-    return Promise.resolve(newTask);
-  },
-  updateTask: (task: Task): Promise<Task> => {
-    const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-    const index = tasks.findIndex((t: Task) => t.id === task.id);
-    if (index !== -1) {
-      tasks[index] = { ...task, updatedAt: new Date() };
-      localStorage.setItem("tasks", JSON.stringify(tasks));
+// API calls for tasks
+const api = {
+  getTasks: async (): Promise<Task[]> => {
+    const response = await fetch("/api/tasks", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to fetch tasks");
     }
-    return Promise.resolve(tasks[index]);
+    return await response.json();
   },
-  deleteTask: (id: number): Promise<void> => {
-    const tasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-    const filteredTasks = tasks.filter((t: Task) => t.id !== id);
-    localStorage.setItem("tasks", JSON.stringify(filteredTasks));
-    return Promise.resolve();
+  addTask: async (task: NewTask): Promise<Task> => {
+    const response = await fetch("/api/tasks", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify(task),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to add task");
+    }
+    return await response.json();
+  },
+  updateTask: async (task: Task): Promise<Task> => {
+    const response = await fetch(`/api/tasks/${task.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+      body: JSON.stringify({
+        title: task.title,
+        description: task.description,
+        dueDate: task.dueDate,
+        status: task.status,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update task");
+    }
+
+    return await response.json();
+  },
+  deleteTask: async (id: number): Promise<void> => {
+    const response = await fetch(`/api/tasks/${id}`, {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("jwt")}`,
+      },
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete task");
+    }
   },
 };
 
 export const useTasks = () => {
   const queryClient = useQueryClient();
 
-  const { data: tasks = [] } = useQuery<Task[]>("tasks", mockApi.getTasks);
+  // Fetching tasks
+  const { data: tasks = [], error } = useQuery<Task[]>("tasks", api.getTasks);
 
-  const addTaskMutation = useMutation(mockApi.addTask, {
+  // Adding a task
+  const addTaskMutation = useMutation(api.addTask, {
     onSuccess: () => {
       queryClient.invalidateQueries("tasks");
     },
   });
 
-  const updateTaskMutation = useMutation(mockApi.updateTask, {
+  // Updating a task
+  const updateTaskMutation = useMutation(api.updateTask, {
     onSuccess: () => {
       queryClient.invalidateQueries("tasks");
     },
   });
 
-  const deleteTaskMutation = useMutation(mockApi.deleteTask, {
+  // Deleting a task
+  const deleteTaskMutation = useMutation(api.deleteTask, {
     onSuccess: () => {
       queryClient.invalidateQueries("tasks");
     },
   });
 
+  // Wrapper functions for mutations
   const addTask = (task: NewTask) => {
     addTaskMutation.mutate(task);
   };
@@ -86,6 +119,7 @@ export const useTasks = () => {
 
   return {
     tasks,
+    error,
     addTask,
     updateTaskStatus,
     deleteTask,
