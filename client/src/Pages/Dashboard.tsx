@@ -2,6 +2,18 @@ import React, { useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useTasks } from "../hooks/useTasks";
 import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { TaskForm as UpdateTaskForm } from "@/components/UpdateTaskForm";
 
 interface TaskFormInputs {
   title: string;
@@ -47,6 +59,21 @@ const TaskList: React.FC<{ status: string }> = ({ status }) => {
                     Undo
                   </button>
                 )}
+                <AlertDialog>
+                  <AlertDialogTrigger>Edit</AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Edit Task</AlertDialogTitle>
+                      <AlertDialogDescription></AlertDialogDescription>
+                      <UpdateTaskForm task={task} />
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+
                 <button
                   onClick={() => deleteTask(task.id)}
                   className="bg-red-500 text-white px-2 py-1 rounded text-sm"
