@@ -1,12 +1,14 @@
 import bcrypt from "bcrypt";
 
 export async function generateSeedData() {
+  // Hashing the password for the seed users
   const passwords = await Promise.all(
     Array(7)
       .fill("password")
       .map((password) => bcrypt.hash(password, 10))
   );
 
+  // Creating user data
   const users = [
     { email: "spikeystona@gmail.com", password: passwords[0] },
     { email: "biswash@gmail.com", password: passwords[1] },
@@ -17,57 +19,23 @@ export async function generateSeedData() {
     { email: "user5@example.com", password: passwords[6] },
   ];
 
-  const tasks = [
-    {
-      title: "Task 1",
-      description: "Description for Task 1",
-      dueDate: new Date(),
-      status: "Pending",
-      userId: "spikeystona@gmail.com",
-    },
-    {
-      title: "Task 2",
-      description: "Description for Task 2",
-      dueDate: new Date(),
-      status: "Completed",
-      userId: "biswash@gmail.com",
-    },
-    {
-      title: "Task 3",
-      description: "Description for Task 3",
-      dueDate: new Date(),
-      status: "Overdue",
-      userId: "user1@example.com",
-    },
-    {
-      title: "Task 4",
-      description: "Description for Task 4",
-      dueDate: new Date(),
-      status: "Pending",
-      userId: "user2@example.com",
-    },
-    {
-      title: "Task 5",
-      description: "Description for Task 5",
-      dueDate: new Date(),
-      status: "Completed",
-      userId: "user3@example.com",
-    },
-    {
-      title: "Task 6",
-      description: "Description for Task 6",
-      dueDate: new Date(),
-      status: "Overdue",
-      userId: "user4@example.com",
-    },
-    {
-      title: "Task 7",
-      description: "Description for Task 7",
-      dueDate: new Date(),
-      status: "Pending",
-      userId: "user5@example.com",
-    },
-  ];
+  // Array of possible statuses
+  const statuses = ["Completed", "Pending", "Overdue"];
+
+  // Generate 100 tasks for user "spikeystona@gmail.com"
+  const tasks = Array(100)
+    .fill(null)
+    .map((_, index) => {
+      const randomStatus =
+        statuses[Math.floor(Math.random() * statuses.length)];
+      return {
+        title: `Task ${index + 1}`,
+        description: `Description for Task ${index + 1}`,
+        dueDate: new Date(),
+        status: randomStatus,
+        userId: "spikeystona@gmail.com", // Assigning the user ID as the seed user
+      };
+    });
 
   return { users, tasks };
 }
