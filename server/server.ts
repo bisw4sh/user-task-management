@@ -6,6 +6,8 @@ import signinRoute from "./routes/signin";
 import protectedRoute from "./routes/protected";
 import tasksRoute from "./routes/tasks";
 import { errorHandler } from "./middleware/error_handler";
+import { prisma } from "./utils/db";
+import cron from "node-cron";
 import "./utils/passport";
 import "dotenv/config";
 
@@ -43,6 +45,31 @@ app.use(
   passport.authenticate("jwt", { session: false }),
   tasksRoute
 );
+
+cron.schedule("0 * * * *", async () => {
+  try {
+    const overdueTasks = await prisma.task.findMany({
+      where: {
+        dueDate: {
+          lt: new Date(),
+        },
+        status: {
+          not: "Overdue",
+        },
+      },
+    });
+
+    for (const task of overdueTasks) {
+      await prisma.task.update({
+        where: { id: task.id },
+        data: { status: "Overdue" },
+      });
+      console.log(`Task with id ${task.id} is now overdue.`);
+    }
+  } catch (error) {
+    console.error("Error updating overdue tasks:", error);
+  }
+});
 
 app.use(errorHandler);
 app.listen(PORT, () => {
